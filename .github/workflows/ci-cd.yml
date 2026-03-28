@@ -3,7 +3,7 @@ name: CloudTech Project CI-CD
 on:
   push:
     branches:
-      - [cite_start]main
+      - main
 
 jobs:
   build-and-push:
