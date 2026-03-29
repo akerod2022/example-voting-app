@@ -1,10 +1,5 @@
 #!/bin/sh
-set -eo pipefail
+set -e
 
-host="$(hostname -i || echo '127.0.0.1')"
-
-if ping="$(redis-cli -h "$host" ping)" && [ "$ping" = 'PONG' ]; then
-	exit 0
-fi
-
-exit 1
+# Використовуємо redis-cli для пінгу сервісу на локальному інтерфейсі
+redis-cli ping | grep -q "PONG"
