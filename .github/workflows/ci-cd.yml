@@ -35,20 +35,24 @@ jobs:
 
       - name: Update docker-compose.yml
         run: |
-          # Цей варіант sed захоплює пробіли на початку рядка (^\s*) 
-          # і використовує їх при заміні (\1), зберігаючи структуру YAML.
+          # 1. Видаляємо всі старі рядки build та image для наших сервісів 
+          # Це очистить конфігурацію від застарілих шляхів.
+          sed -i '/build:.*vote/d' docker-compose.yml
+          sed -i '/image:.*vote/d' docker-compose.yml
+          sed -i '/build:.*result/d' docker-compose.yml
+          sed -i '/image:.*result/d' docker-compose.yml
+          sed -i '/build:.*worker/d' docker-compose.yml
+          sed -i '/image:.*worker/d' docker-compose.yml
+
+          # 2. Вставляємо один правильний рядок image відразу після назви сервісу [cite: 103]
+          # Ми використовуємо 4 пробіли для відступу, щоб зберегти структуру YAML.
+          sed -i '/vote:/a \    image: ${{ secrets.ACR_LOGIN_SERVER }}/vote:latest' docker-compose.yml
+          sed -i '/result:/a \    image: ${{ secrets.ACR_LOGIN_SERVER }}/result:latest' docker-compose.yml
+          sed -i '/worker:/a \    image: ${{ secrets.ACR_LOGIN_SERVER }}/worker:latest' docker-compose.yml
           
-          # Для vote [cite: 103]
-          sed -i 's|^\([[:space:]]*\)build:.*vote.*|\1image: ${{ secrets.ACR_LOGIN_SERVER }}/vote:latest|g' docker-compose.yml
-          sed -i 's|^\([[:space:]]*\)image: .*vote.*|\1image: ${{ secrets.ACR_LOGIN_SERVER }}/vote:latest|g' docker-compose.yml
-          
-          # Для result [cite: 103]
-          sed -i 's|^\([[:space:]]*\)build:.*result.*|\1image: ${{ secrets.ACR_LOGIN_SERVER }}/result:latest|g' docker-compose.yml
-          sed -i 's|^\([[:space:]]*\)image: .*result.*|\1image: ${{ secrets.ACR_LOGIN_SERVER }}/result:latest|g' docker-compose.yml
-          
-          # Для worker [cite: 103]
-          sed -i 's|^\([[:space:]]*\)build:.*worker.*|\1image: ${{ secrets.ACR_LOGIN_SERVER }}/worker:latest|g' docker-compose.yml
-          sed -i 's|^\([[:space:]]*\)image: .*worker.*|\1image: ${{ secrets.ACR_LOGIN_SERVER }}/worker:latest|g' docker-compose.yml
+          # 3. Перевірка: виводимо файл у лог GitHub Actions, щоб побачити результат
+          echo "--- Оновлений docker-compose.yml ---"
+          cat docker-compose.yml
 
       - name: Copy docker-compose to VM
         uses: appleboy/scp-action@master
