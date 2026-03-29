@@ -57,13 +57,13 @@ jobs:
           echo "--- Оновлений docker-compose.yml ---"
           cat docker-compose.yml
 
-      - name: Copy docker-compose to VM
+      - name: Copy docker-compose and healthchecks to VM
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "docker-compose.yml"
+          source: "docker-compose.yml,healthchecks/"
           target: "~/"
 
       - name: Execute remote deploy commands
