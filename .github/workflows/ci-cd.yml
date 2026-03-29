@@ -35,22 +35,25 @@ jobs:
 
       - name: Update docker-compose.yml
         run: |
-          # 1. Видаляємо всі старі рядки build та image для наших сервісів 
-          # Це очистить конфігурацію від застарілих шляхів.
-          sed -i '/build:.*vote/d' docker-compose.yml
+          # 1. Видаляємо всі старі блоки build та image для наших сервісів.
+          # Ми використовуємо діапазон від назви сервісу до 'depends_on:', щоб точно знайти потрібні рядки.
+          
+          sed -i '/^  vote:/,/depends_on:/ { /build:/d; /context:/d; /target:/d }' docker-compose.yml
+          sed -i '/^  result:/,/depends_on:/ { /build:/d }' docker-compose.yml
+          sed -i '/^  worker:/,/depends_on:/ { /build:/d; /context:/d }' docker-compose.yml
+
+          # Видаляємо старі image, якщо вони були
           sed -i '/image:.*vote/d' docker-compose.yml
-          sed -i '/build:.*result/d' docker-compose.yml
           sed -i '/image:.*result/d' docker-compose.yml
-          sed -i '/build:.*worker/d' docker-compose.yml
           sed -i '/image:.*worker/d' docker-compose.yml
 
-          # 2. Вставляємо один правильний рядок image відразу після назви сервісу [cite: 103]
-          # Ми використовуємо 4 пробіли для відступу, щоб зберегти структуру YAML.
-          sed -i '/vote:/a \    image: ${{ secrets.ACR_LOGIN_SERVER }}/vote:latest' docker-compose.yml
-          sed -i '/result:/a \    image: ${{ secrets.ACR_LOGIN_SERVER }}/result:latest' docker-compose.yml
-          sed -i '/worker:/a \    image: ${{ secrets.ACR_LOGIN_SERVER }}/worker:latest' docker-compose.yml
+          # 2. Вставляємо один правильний рядок image відразу після назви сервісу.
+          # Використовуємо '^  service:', щоб знайти саме початок визначення сервісу.
+          sed -i '/^  vote:/a \    image: ${{ secrets.ACR_LOGIN_SERVER }}/vote:latest' docker-compose.yml
+          sed -i '/^  result:/a \    image: ${{ secrets.ACR_LOGIN_SERVER }}/result:latest' docker-compose.yml
+          sed -i '/^  worker:/a \    image: ${{ secrets.ACR_LOGIN_SERVER }}/worker:latest' docker-compose.yml
           
-          # 3. Перевірка: виводимо файл у лог GitHub Actions, щоб побачити результат
+          # 3. Перевірка
           echo "--- Оновлений docker-compose.yml ---"
           cat docker-compose.yml
 
