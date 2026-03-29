@@ -86,5 +86,7 @@ jobs:
             sudo docker login ${{ secrets.ACR_LOGIN_SERVER }} -u ${{ secrets.ACR_USERNAME }} -p ${{ secrets.ACR_PASSWORD }}
             # Надаємо права на виконання скриптам healthcheck
             sudo chmod +x ~/healthchecks/*.sh
+            # Зупиняємо старі контейнери та видаляємо волюми, щоб очистити стан
+            sudo docker compose down -v
             sudo docker compose pull
             sudo docker compose up -d --remove-orphans

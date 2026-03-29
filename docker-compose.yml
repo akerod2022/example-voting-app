@@ -56,7 +56,7 @@ services:
     volumes:
       - "./healthchecks:/healthchecks"
     healthcheck:
-      test: /healthchecks/redis.sh
+      test: ["CMD-SHELL", "sh /healthchecks/redis.sh"]
       interval: "5s"
     networks:
       - back-tier
@@ -70,7 +70,7 @@ services:
       - "db-data:/var/lib/postgresql/data"
       - "./healthchecks:/healthchecks"
     healthcheck:
-      test: /healthchecks/postgres.sh
+      test: ["CMD-SHELL", "sh /healthchecks/postgres.sh"]
       interval: "5s"
     networks:
       - back-tier
